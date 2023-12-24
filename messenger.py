@@ -27,7 +27,6 @@ class Messenger:
         }
 
         await self.inform_user(addressee_id, message)
-        await self.inform_user(sender_id, message)
 
     async def inform_user(self, _id, message):
         if _id in self.ws_chat.conns:
