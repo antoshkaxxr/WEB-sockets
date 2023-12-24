@@ -10,7 +10,8 @@ class Annunciator:
             {
                 'mtype': 'USER_ENTER',
                 'id': _id
-            }
+            },
+            _id
         )
 
     async def signal_user_log_out(self, _id):
@@ -21,9 +22,11 @@ class Annunciator:
             {
                 'mtype': 'USER_LEAVE',
                 'id': _id
-            }
+            },
+            _id
         )
 
-    async def inform_users(self, message):
-        for _web_socket in self.ws_chat.conns.values():
-            await _web_socket.send_json(message)
+    async def inform_users(self, message, user_id):
+        for _id, _web_socket in self.ws_chat.conns.items():
+            if _id != user_id:
+                await _web_socket.send_json(message)

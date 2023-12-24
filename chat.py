@@ -25,9 +25,7 @@ class WSChat:
         user_id = None
         async for message in web_socket:
             try:
-                if message.type == aiohttp.WSMsgType.ERROR:
-                    print(f'Websocket connection was suddenly closed: {web_socket.exception()}')
-
+                self.check_for_error(web_socket, message)
                 if not (message.type == aiohttp.WSMsgType.TEXT and message.data):
                     continue
 
@@ -48,6 +46,11 @@ class WSChat:
 
         return web_socket
 
+    @staticmethod
+    def check_for_error(_web_socket, message):
+        if message.type == aiohttp.WSMsgType.ERROR:
+            print(f'Websocket connection was suddenly closed: {_web_socket.exception()}')
+
     async def maintain_init(self, data, web_socket):
         _user_id = data.get('id')
         self.conns[_user_id] = web_socket
@@ -56,10 +59,10 @@ class WSChat:
 
     async def maintain_text(self, data, _user_id):
         text, addressee_id = data.get('text'), data.get('to')
-        if addressee_id:
-            await self.messenger.send_direct_message(_user_id, addressee_id, text)
-        else:
+        if not addressee_id:
             await self.messenger.send_message_to_all_users(_user_id, text)
+        else:
+            await self.messenger.send_direct_message(_user_id, addressee_id, text)
 
     def run(self):
         app = web.Application()
